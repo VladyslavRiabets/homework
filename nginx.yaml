@@ -1,0 +1,24 @@
+---
+- name: Install and configure  Web Server 
+  hosts: all 
+  become: yes
+
+  vars:
+    source: /root/ansible/index.html 
+    destin: /var/www/html
+
+  tasks:
+  - name: Install server
+    apt: name=nginx state=present
+
+
+  - name: Configure server
+    copy: src={{ source }} dest={{ destin }} mode=0555
+    notify: restart
+
+  - name: Start WEB and enable it
+    service: name=nginx state=started enabled=yes
+
+  handlers:
+  - name: restart 
+    service: name=nginx state=restarted 

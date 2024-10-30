@@ -1,0 +1,13 @@
+---
+- name: List /etc Directory
+  hosts: staging
+  become: yes
+ 
+  tasks:
+    - name: Run ls /etc command
+      command: ls /etc
+      register: ls_etc
+
+    - name: Show the output
+      debug:
+        var: ls_etc

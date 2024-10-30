@@ -1,0 +1,50 @@
+---
+- name: Install Docker
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: apt-get update
+      apt:
+        update_cache: yes
+
+    - name: Install prerequisites
+      apt:
+        name:
+          - ca-certificates 
+          - curl 
+        state: present
+
+    - name: Create /etc/apt/keyrings directory with permissions
+      shell: |
+        install -m 0755 -d /etc/apt/keyrings
+
+    - name: Download Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Add the repository to APT sources
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | tee /etc/apt/sources.list.d/docker.list
+      args:
+        executable: /bin/bash
+
+    - name: apt-get update
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Run Docker hello-world
+      command: docker run hello-world
+      register: hello_world_output
